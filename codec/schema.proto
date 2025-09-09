@@ -123,6 +123,8 @@ message GraphCodeIndex {
       DEPENDS_ON_EXTERNAL = 11;
       IMPLEMENTS_MODULE = 12;
       IMPLEMENTS = 13;
+      AT_PATH = 14;
+      BELONGS_TO = 15;
     }
 
     RelationshipType type = 1;
@@ -231,4 +233,11 @@ message GraphCodeIndex {
     int32 end_line = 5;
     repeated string decorators = 6;
     bool is_exported = 7;
+  }
+
+  message FilePath {
+    // Primary key
+    string qualified_name = 1;
+
+    string path = 2;
   }
