@@ -74,16 +74,17 @@ class StructureProcessor:
                     },
                 )
 
-                # (:Path) node for directory
-                file_path_qn = self.project_name + "." + str(relative_root)
+                # (:Path) for this package directory
+                path_qn = f"{self.project_name}.{str(relative_root)}"
                 self.ingestor.ensure_node_batch(
                     "Path",
                     {
-                        "qualified_name": file_path_qn,
+                        "qualified_name": path_qn,
                         "path": str(relative_root),
                     },
                 )
 
+                # Determine parent container (Project | Package | Folder)
                 parent_label, parent_key, parent_val = (
                     ("Project", "name", self.project_name)
                     if parent_rel_path == Path(".")
@@ -93,26 +94,43 @@ class StructureProcessor:
                         else ("Folder", "path", str(parent_rel_path))
                     )
                 )
+
+                # parent -> CONTAINS_PACKAGE -> this package
                 self.ingestor.ensure_relationship_batch(
                     (parent_label, parent_key, parent_val),
                     "CONTAINS_PACKAGE",
                     ("Package", "qualified_name", package_qn),
                 )
 
-                # (:Package|Folder)-[:AT_PATH]->(:Path)
-                if parent_label == "Package" or parent_label == "Folder":
+                # this package -> AT_PATH -> its Path
+                self.ingestor.ensure_relationship_batch(
+                    ("Package", "qualified_name", package_qn),
+                    "AT_PATH",
+                    ("Path", "qualified_name", path_qn),
+                )
+
+                # If parent is a Folder, also link Folder -> AT_PATH -> child package's Path
+                if parent_label == "Folder":
                     self.ingestor.ensure_relationship_batch(
                         (parent_label, parent_key, parent_val),
                         "AT_PATH",
-                        ("Path", "qualified_name", file_path_qn),
+                        ("Path", "qualified_name", path_qn),
                     )
 
             elif root != self.repo_path:
                 self.structural_elements[relative_root] = None  # Mark as folder
                 logger.info(f"  Identified Folder: '{relative_root}'")
+                folder_qn = ".".join([self.project_name] + list(relative_root.parts))
                 self.ingestor.ensure_node_batch(
-                    "Folder", {"path": str(relative_root), "name": root.name}
+                    "Folder",
+                    {
+                        "path": str(relative_root),
+                        "name": root.name,
+                        "qualified_name": folder_qn,
+                    },
                 )
+
+                # Determine parent container (Project | Package | Folder)
                 parent_label, parent_key, parent_val = (
                     ("Project", "name", self.project_name)
                     if parent_rel_path == Path(".")
@@ -122,16 +140,36 @@ class StructureProcessor:
                         else ("Folder", "path", str(parent_rel_path))
                     )
                 )
+
+                # parent -> CONTAINS_FOLDER -> this folder
                 self.ingestor.ensure_relationship_batch(
                     (parent_label, parent_key, parent_val),
                     "CONTAINS_FOLDER",
                     ("Folder", "path", str(relative_root)),
                 )
 
+                # this folder -> AT_PATH -> its Path
+                path_qn = f"{self.project_name}.{str(relative_root)}"
+                self.ingestor.ensure_node_batch(
+                    "Path",
+                    {
+                        "qualified_name": path_qn,
+                        "path": str(relative_root),
+                    },
+                )
+                self.ingestor.ensure_relationship_batch(
+                    ("Folder", "path", str(relative_root)),
+                    "AT_PATH",
+                    ("Path", "qualified_name", path_qn),
+                )
+
     def process_generic_file(self, file_path: Path, file_name: str) -> None:
         """Process a generic (non-parseable) file and create appropriate nodes/relationships."""
-        relative_filepath = str(file_path.relative_to(self.repo_path))
-        relative_root = file_path.parent.relative_to(self.repo_path)
+        relative_file = file_path.relative_to(self.repo_path)  # Path
+        relative_root = relative_file.parent
+        file_qn = ".".join(
+            [self.project_name] + list(relative_file.with_suffix("").parts)
+        )
 
         # Determine the parent container
         parent_container_qn = self.structural_elements.get(relative_root)
@@ -149,9 +187,10 @@ class StructureProcessor:
         self.ingestor.ensure_node_batch(
             "File",
             {
-                "path": relative_filepath,
+                "path": str(relative_file),
                 "name": file_name,
                 "extension": file_path.suffix,
+                "qualified_name": file_qn,
             },
         )
 
@@ -159,13 +198,13 @@ class StructureProcessor:
         self.ingestor.ensure_relationship_batch(
             (parent_label, parent_key, parent_val),
             "CONTAINS_FILE",
-            ("File", "path", relative_filepath),
+            ("File", "path", str(relative_file)),
         )
 
-        # (f:File)-[:AT_PATH]->(p:Path)
-        file_path_qn = self.project_name + "." + relative_filepath
+        # (File)-[:AT_PATH]->(Path)
+        file_path_qn = f"{self.project_name}.{str(relative_file)}"
         self.ingestor.ensure_relationship_batch(
-            ("File", "path", relative_filepath),
+            ("File", "path", str(relative_file)),
             "AT_PATH",
             ("Path", "qualified_name", file_path_qn),
         )

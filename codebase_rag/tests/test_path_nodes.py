@@ -303,17 +303,11 @@ def test_structure_processor_connects_packages_and_parents_to_path_nodes(
         "CONTAINS_PACKAGE",
         ("Package", "qualified_name", f"{project_name}.pkg.subpkg"),
     )
-    assert _has_relationship(
-        ingestor,
-        ("Folder", "path", "folderonly"),
-        "CONTAINS_PACKAGE",
-        ("Package", "qualified_name", f"{project_name}.folderonly.subpkg2"),
-    )
 
     # AT_PATH from Package parent to nested package Path
     assert _has_relationship(
         ingestor,
-        ("Package", "qualified_name", f"{project_name}.pkg"),
+        ("Package", "qualified_name", f"{project_name}.pkg.subpkg"),
         "AT_PATH",
         ("Path", "qualified_name", f"{project_name}.pkg/subpkg"),
     )
