@@ -136,6 +136,30 @@ class DefinitionProcessor:
                 },
             )
 
+            file_path_qn = self.project_name + "." + relative_path_str
+            # (:FilePath) create
+            self.ingestor.ensure_node_batch(
+                "FilePath",
+                {
+                    "qualified_name": file_path_qn,
+                    "path": relative_path_str,
+                },
+            )
+
+            # (:Module)-[:AT_PATH]->(:FilePath)
+            self.ingestor.ensure_relationship_batch(
+                ("Module", "qualified_name", module_qn),
+                "AT_PATH",
+                ("FilePath", "qualified_name", file_path_qn),
+            )
+
+            # (:FilePath)-[:BELONGS_TO]->(:Project)
+            self.ingestor.ensure_relationship_batch(
+                ("FilePath", "qualified_name", file_path_qn),
+                "BELONGS_TO",
+                ("Project", "name", self.project_name),
+            )
+
             # Link Module to its parent Package/Folder
             parent_rel_path = relative_path.parent
             parent_container_qn = structural_elements.get(parent_rel_path)
