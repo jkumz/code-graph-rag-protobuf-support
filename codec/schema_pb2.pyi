@@ -81,6 +81,7 @@ class Node(google.protobuf.message.Message):
     EXTERNAL_PACKAGE_FIELD_NUMBER: builtins.int
     MODULE_IMPLEMENTATION_FIELD_NUMBER: builtins.int
     MODULE_INTERFACE_FIELD_NUMBER: builtins.int
+    PATH_FIELD_NUMBER: builtins.int
     @property
     def project(self) -> global___Project: ...
     @property
@@ -101,6 +102,8 @@ class Node(google.protobuf.message.Message):
     def module_implementation(self) -> global___ModuleImplementation: ...
     @property
     def module_interface(self) -> global___ModuleInterface: ...
+    @property
+    def path(self) -> global___Path: ...
     def __init__(
         self,
         *,
@@ -114,6 +117,7 @@ class Node(google.protobuf.message.Message):
         external_package: global___ExternalPackage | None = ...,
         module_implementation: global___ModuleImplementation | None = ...,
         module_interface: global___ModuleInterface | None = ...,
+        path: global___Path | None = ...,
     ) -> None: ...
     def HasField(
         self,
@@ -138,6 +142,8 @@ class Node(google.protobuf.message.Message):
             b"module_interface",
             "package",
             b"package",
+            "path",
+            b"path",
             "payload",
             b"payload",
             "project",
@@ -167,6 +173,8 @@ class Node(google.protobuf.message.Message):
             b"module_interface",
             "package",
             b"package",
+            "path",
+            b"path",
             "payload",
             b"payload",
             "project",
@@ -188,6 +196,7 @@ class Node(google.protobuf.message.Message):
             "external_package",
             "module_implementation",
             "module_interface",
+            "path",
         ]
         | None
     ): ...
@@ -674,7 +683,7 @@ class Class(google.protobuf.message.Message):
 global___Class = Class
 
 @typing.final
-class FilePath(google.protobuf.message.Message):
+class Path(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
 
     QUALIFIED_NAME_FIELD_NUMBER: builtins.int
@@ -695,4 +704,4 @@ class FilePath(google.protobuf.message.Message):
         ],
     ) -> None: ...
 
-global___FilePath = FilePath
+global___Path = Path

@@ -137,25 +137,25 @@ class DefinitionProcessor:
             )
 
             file_path_qn = self.project_name + "." + relative_path_str
-            # (:FilePath) create
+            # (:Path) create
             self.ingestor.ensure_node_batch(
-                "FilePath",
+                "Path",
                 {
                     "qualified_name": file_path_qn,
                     "path": relative_path_str,
                 },
             )
 
-            # (:Module)-[:AT_PATH]->(:FilePath)
+            # (:Module)-[:AT_PATH]->(:Path)
             self.ingestor.ensure_relationship_batch(
                 ("Module", "qualified_name", module_qn),
                 "AT_PATH",
-                ("FilePath", "qualified_name", file_path_qn),
+                ("Path", "qualified_name", file_path_qn),
             )
 
-            # (:FilePath)-[:BELONGS_TO]->(:Project)
+            # (:Path)-[:BELONGS_TO]->(:Project)
             self.ingestor.ensure_relationship_batch(
-                ("FilePath", "qualified_name", file_path_qn),
+                ("Path", "qualified_name", file_path_qn),
                 "BELONGS_TO",
                 ("Project", "name", self.project_name),
             )

@@ -141,7 +141,7 @@ def _has_relationship(
 def test_process_file_emits_filepath_node_and_relationships(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    """Ensures FilePath node, Module-[:AT_PATH]->FilePath, and FilePath-[:BELONGS_TO]->Project are emitted for a regular file."""
+    """Ensures Path node, Module-[:AT_PATH]->Path, and Path-[:BELONGS_TO]->Project are emitted for a regular file."""
     import codebase_rag.parsers.definition_processor as dp_mod
 
     monkeypatch.setattr(dp_mod, "QueryCursor", DummyQueryCursor)
@@ -173,8 +173,8 @@ def test_process_file_emits_filepath_node_and_relationships(
     )
     expected_filepath_qualified_name = f"{project_name}.{relative_path}"
 
-    fp_node = _find_node_call(ingestor, "FilePath")
-    assert fp_node is not None, "Expected a FilePath node to be created"
+    fp_node = _find_node_call(ingestor, "Path")
+    assert fp_node is not None, "Expected a Path node to be created"
     assert fp_node.get("qualified_name") == expected_filepath_qualified_name
     assert fp_node.get("path") == str(relative_path.as_posix())
 
@@ -182,21 +182,21 @@ def test_process_file_emits_filepath_node_and_relationships(
         ingestor,
         ("Module", "qualified_name", expected_module_qn),
         "AT_PATH",
-        ("FilePath", "qualified_name", expected_filepath_qualified_name),
-    ), "Expected Module -[:AT_PATH]-> FilePath relationship"
+        ("Path", "qualified_name", expected_filepath_qualified_name),
+    ), "Expected Module -[:AT_PATH]-> Path relationship"
 
     assert _has_relationship(
         ingestor,
-        ("FilePath", "qualified_name", expected_filepath_qualified_name),
+        ("Path", "qualified_name", expected_filepath_qualified_name),
         "BELONGS_TO",
         ("Project", "name", project_name),
-    ), "Expected FilePath -[:BELONGS_TO]-> Project relationship"
+    ), "Expected Path -[:BELONGS_TO]-> Project relationship"
 
 
 def test_process_file_handles_init_py_module_qn(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    """Validates that __init__.py maps the module QN to the parent package and still emits FilePath nodes and relationships."""
+    """Validates that __init__.py maps the module QN to the parent package and still emits Path nodes and relationships."""
     import codebase_rag.parsers.definition_processor as dp_mod
 
     monkeypatch.setattr(dp_mod, "QueryCursor", DummyQueryCursor)
@@ -223,7 +223,7 @@ def test_process_file_handles_init_py_module_qn(
     expected_module_qn = ".".join([project_name] + list(relative_path.parent.parts))
     expected_filepath_qn = f"{project_name}.{relative_path}"
 
-    fp_node = _find_node_call(ingestor, "FilePath")
+    fp_node = _find_node_call(ingestor, "Path")
     assert fp_node is not None
     assert fp_node.get("qualified_name") == expected_filepath_qn
     assert fp_node.get("path") == str(relative_path)
@@ -232,12 +232,12 @@ def test_process_file_handles_init_py_module_qn(
         ingestor,
         ("Module", "qualified_name", expected_module_qn),
         "AT_PATH",
-        ("FilePath", "qualified_name", expected_filepath_qn),
+        ("Path", "qualified_name", expected_filepath_qn),
     )
 
     assert _has_relationship(
         ingestor,
-        ("FilePath", "qualified_name", expected_filepath_qn),
+        ("Path", "qualified_name", expected_filepath_qn),
         "BELONGS_TO",
         ("Project", "name", project_name),
     )

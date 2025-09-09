@@ -102,6 +102,7 @@ message GraphCodeIndex {
       ExternalPackage external_package = 9;
       ModuleImplementation module_implementation = 10;
       ModuleInterface module_interface = 11;
+      Path path = 12;
     }
   }
 
@@ -235,7 +236,7 @@ message GraphCodeIndex {
     bool is_exported = 7;
   }
 
-  message FilePath {
+  message Path {
     // Primary key
     string qualified_name = 1;
 
