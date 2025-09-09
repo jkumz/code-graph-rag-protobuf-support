@@ -28,6 +28,7 @@ class ProtobufFileIngestor:
         "ExternalPackage": "external_package",
         "ModuleImplementation": "module_implementation",
         "ModuleInterface": "module_interface",
+        "Path": "path",
     }
 
     ONEOF_FIELD_TO_LABEL: dict[str, str] = {
