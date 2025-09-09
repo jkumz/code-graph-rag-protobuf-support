@@ -8,6 +8,7 @@ from tree_sitter import Tree
 from codebase_rag.language_config import get_language_config_by_name
 from codebase_rag.parsers.definition_processor import DefinitionProcessor
 from codebase_rag.parsers.import_processor import ImportProcessor
+from codebase_rag.parsers.structure_processor import StructureProcessor
 
 
 class RecordingIngestor:
@@ -240,4 +241,142 @@ def test_process_file_handles_init_py_module_qn(
         ("Path", "qualified_name", expected_filepath_qn),
         "BELONGS_TO",
         ("Project", "name", project_name),
+    )
+
+
+def test_structure_processor_connects_packages_and_parents_to_path_nodes(
+    tmp_path: Path,
+) -> None:
+    """Ensure package directories emit Path nodes and their parents (Package/Folder) link via AT_PATH."""
+    project_name = "structproj"
+    repo_path = tmp_path / "repo"
+    # Layout:
+    # repo/pkg/__init__.py            -> top-level package (parent is Project)
+    # repo/pkg/subpkg/__init__.py     -> nested package     (parent is Package)
+    # repo/folderonly/subpkg2/__init__.py -> package under a Folder parent
+    (repo_path / "pkg" / "subpkg").mkdir(parents=True, exist_ok=True)
+    (repo_path / "pkg" / "__init__.py").write_text("", encoding="utf-8")
+    (repo_path / "pkg" / "subpkg" / "__init__.py").write_text("", encoding="utf-8")
+    (repo_path / "folderonly" / "subpkg2").mkdir(parents=True, exist_ok=True)
+    (repo_path / "folderonly" / "subpkg2" / "__init__.py").write_text(
+        "", encoding="utf-8"
+    )
+
+    ingestor = RecordingIngestor()
+    # Project is ensured by the orchestrator; add it here for relationship targets
+    ingestor.ensure_node_batch("Project", {"name": project_name})
+
+    queries = _make_queries_for("python")
+    sp = StructureProcessor(
+        ingestor=ingestor,
+        repo_path=repo_path,
+        project_name=project_name,
+        queries=queries,
+    )
+    sp.identify_structure()
+
+    # Expected Path nodes for package directories
+    expected_path_qns = {
+        f"{project_name}.pkg": "pkg",
+        f"{project_name}.pkg/subpkg": "pkg/subpkg",
+        f"{project_name}.folderonly/subpkg2": "folderonly/subpkg2",
+    }
+    created_paths = {
+        props["qualified_name"]: props
+        for (label, props) in ingestor.node_calls
+        if label == "Path"
+    }
+    for qn, rel_path in expected_path_qns.items():
+        assert qn in created_paths, f"Missing Path node: {qn}"
+        assert created_paths[qn]["path"] == rel_path
+
+    # CONTAINS_PACKAGE relationships
+    assert _has_relationship(
+        ingestor,
+        ("Project", "name", project_name),
+        "CONTAINS_PACKAGE",
+        ("Package", "qualified_name", f"{project_name}.pkg"),
+    )
+    assert _has_relationship(
+        ingestor,
+        ("Package", "qualified_name", f"{project_name}.pkg"),
+        "CONTAINS_PACKAGE",
+        ("Package", "qualified_name", f"{project_name}.pkg.subpkg"),
+    )
+    assert _has_relationship(
+        ingestor,
+        ("Folder", "path", "folderonly"),
+        "CONTAINS_PACKAGE",
+        ("Package", "qualified_name", f"{project_name}.folderonly.subpkg2"),
+    )
+
+    # AT_PATH from Package parent to nested package Path
+    assert _has_relationship(
+        ingestor,
+        ("Package", "qualified_name", f"{project_name}.pkg"),
+        "AT_PATH",
+        ("Path", "qualified_name", f"{project_name}.pkg/subpkg"),
+    )
+    # AT_PATH from Folder parent to nested package Path
+    assert _has_relationship(
+        ingestor,
+        ("Folder", "path", "folderonly"),
+        "AT_PATH",
+        ("Path", "qualified_name", f"{project_name}.folderonly/subpkg2"),
+    )
+    # No AT_PATH from Project to top-level package Path
+    assert not _has_relationship(
+        ingestor,
+        ("Project", "name", project_name),
+        "AT_PATH",
+        ("Path", "qualified_name", f"{project_name}.pkg"),
+    )
+
+
+def test_structure_processor_process_generic_file_links_to_path(tmp_path: Path) -> None:
+    """Ensure generic files are created and linked to their Path via AT_PATH."""
+    project_name = "structproj2"
+    repo_path = tmp_path / "repo2"
+    (repo_path / "docs").mkdir(parents=True, exist_ok=True)
+    file_path = repo_path / "docs" / "readme.txt"
+    file_path.write_text("hello", encoding="utf-8")
+
+    ingestor = RecordingIngestor()
+    ingestor.ensure_node_batch("Project", {"name": project_name})
+
+    queries = _make_queries_for("python")
+    sp = StructureProcessor(
+        ingestor=ingestor,
+        repo_path=repo_path,
+        project_name=project_name,
+        queries=queries,
+    )
+    # Populate structural elements so parent Folder 'docs' is known
+    sp.identify_structure()
+    sp.process_generic_file(file_path=file_path, file_name="readme.txt")
+
+    relative_fp = "docs/readme.txt"
+
+    # File node exists
+    file_nodes = [
+        props
+        for (label, props) in ingestor.node_calls
+        if label == "File" and props.get("path") == relative_fp
+    ]
+    assert file_nodes, "Expected a File node for docs/readme.txt"
+
+    # Folder CONTAINS_FILE File
+    assert _has_relationship(
+        ingestor,
+        ("Folder", "path", "docs"),
+        "CONTAINS_FILE",
+        ("File", "path", relative_fp),
+    )
+
+    # File AT_PATH Path (Path node may be created elsewhere; here we only assert the link)
+    assert _has_relationship(
+        ingestor,
+        ("File", "path", relative_fp),
+        "AT_PATH",
+        ("Path", "qualified_name", f"{project_name}.{relative_fp}"),
     )

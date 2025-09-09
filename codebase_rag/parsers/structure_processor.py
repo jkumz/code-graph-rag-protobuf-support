@@ -73,6 +73,17 @@ class StructureProcessor:
                         "path": str(relative_root),
                     },
                 )
+
+                # (:Path) node for directory
+                file_path_qn = self.project_name + "." + str(relative_root)
+                self.ingestor.ensure_node_batch(
+                    "Path",
+                    {
+                        "qualified_name": file_path_qn,
+                        "path": str(relative_root),
+                    },
+                )
+
                 parent_label, parent_key, parent_val = (
                     ("Project", "name", self.project_name)
                     if parent_rel_path == Path(".")
@@ -87,6 +98,15 @@ class StructureProcessor:
                     "CONTAINS_PACKAGE",
                     ("Package", "qualified_name", package_qn),
                 )
+
+                # (:Package|Folder)-[:AT_PATH]->(:Path)
+                if parent_label == "Package" or parent_label == "Folder":
+                    self.ingestor.ensure_relationship_batch(
+                        (parent_label, parent_key, parent_val),
+                        "AT_PATH",
+                        ("Path", "qualified_name", file_path_qn),
+                    )
+
             elif root != self.repo_path:
                 self.structural_elements[relative_root] = None  # Mark as folder
                 logger.info(f"  Identified Folder: '{relative_root}'")
@@ -140,4 +160,12 @@ class StructureProcessor:
             (parent_label, parent_key, parent_val),
             "CONTAINS_FILE",
             ("File", "path", relative_filepath),
+        )
+
+        # (f:File)-[:AT_PATH]->(p:Path)
+        file_path_qn = self.project_name + "." + relative_filepath
+        self.ingestor.ensure_relationship_batch(
+            ("File", "path", relative_filepath),
+            "AT_PATH",
+            ("Path", "qualified_name", file_path_qn),
         )
