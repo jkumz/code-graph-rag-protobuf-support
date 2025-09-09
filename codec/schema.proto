@@ -6,72 +6,10 @@ import "google/protobuf/struct.proto";
 
 
 /*
-
-We are parsing the entire codebase into ASTs & putting that into a codegraph.
-This makes the Project node the top level root, and everything then will span from it.
-
-Roughly, we're going to be looking at something like this:
-
-Project
-    Folder
-        File
-        Module
-            Function
-            Class
-                Method
-    Package
-        Module
-            Function
-            Class
-                Method
-    ExternalPackage
-
-We can't build a literal nested tree like so because we would have duplicated results.
-I think the correct way to go about this would be to have IDs for each nested structure.
-Then the parents/nodes that have an outgoing connection to the child node will have a
-list of IDs of the children with which they're connected with. Flattened, this would bring
-us to something like this:
-
-Project
-    - List of Package IDs for CONTAINS_PACKAGE rels
-    - List of ExternalPackage IDs for DEPENDS_ON_EXTERNAL rels (or whatever it is; need to double check)
-    - List of Folder IDs for CONTAINS_FOLDER rels
-Folder
-    - List of File IDs for CONTAINS_FILE rels
-    - List of Module IDs for CONTAINS_MODULE rels
-File
-Module
-    - List of Function IDs for DEFINES rels
-    - List of Class IDs for DEFINES rels
 ModuleImplementation
     - TODO: think about this
 ModuleInterface
     - TODO: think about this
-Function
-    - List of Function IDs for CALLS rels
-    - List of Method IDs for CALLS rels
-Class
-    - List of Method IDs for DEFINES_METHOD rels
-    - List of Class IDs for INHERITS rels
-Method
-    - List of Method IDs for CALLS rels
-    - List of Method IDs for OVERRIDES rels
-    - List of Function IDs for CALLS rels
-Package
-    - List of Module IDs for CONTAINS_MODULE rels
-ExternalPackage
-
-
-And then the rest of the params are just direct translations from what's in the
-memgraph schema, nothing special. Not worth listing in the tree. Can just check the shema.
-
-So that's the structure of the schema. I guess the next thing is how do we parse it into
-that structure?
-
-Well, we want to do everything the same up to the GraphUpdate part in the system architecture.
-Beyond that, we need a new Ingestor class in the Data Layer, next to the Memgraph Ingestor.
-This new Ingestor won't be communicating to Memgraph Database but instead be outputting
-a protobuf file.
 */
 
 // =======================================================
@@ -155,18 +93,20 @@ message GraphCodeIndex {
   }
 
   message Folder {
-    // Primary Key
     string path = 1;
 
     string name = 2;
+    // New primary key
+    string qualified_name = 3;
   }
 
   message File {
-    // Primary Key
     string path = 1;
 
     string name = 2;
     string extension = 3;
+    // New primary key
+    string qualified_name = 4;
   }
 
   message Module {

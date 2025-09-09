@@ -363,17 +363,23 @@ class Folder(google.protobuf.message.Message):
 
     PATH_FIELD_NUMBER: builtins.int
     NAME_FIELD_NUMBER: builtins.int
+    QUALIFIED_NAME_FIELD_NUMBER: builtins.int
     path: builtins.str
-    """Primary Key"""
     name: builtins.str
+    qualified_name: builtins.str
+    """New primary key"""
     def __init__(
         self,
         *,
         path: builtins.str = ...,
         name: builtins.str = ...,
+        qualified_name: builtins.str = ...,
     ) -> None: ...
     def ClearField(
-        self, field_name: typing.Literal["name", b"name", "path", b"path"]
+        self,
+        field_name: typing.Literal[
+            "name", b"name", "path", b"path", "qualified_name", b"qualified_name"
+        ],
     ) -> None: ...
 
 global___Folder = Folder
@@ -385,21 +391,31 @@ class File(google.protobuf.message.Message):
     PATH_FIELD_NUMBER: builtins.int
     NAME_FIELD_NUMBER: builtins.int
     EXTENSION_FIELD_NUMBER: builtins.int
+    QUALIFIED_NAME_FIELD_NUMBER: builtins.int
     path: builtins.str
-    """Primary Key"""
     name: builtins.str
     extension: builtins.str
+    qualified_name: builtins.str
+    """New primary key"""
     def __init__(
         self,
         *,
         path: builtins.str = ...,
         name: builtins.str = ...,
         extension: builtins.str = ...,
+        qualified_name: builtins.str = ...,
     ) -> None: ...
     def ClearField(
         self,
         field_name: typing.Literal[
-            "extension", b"extension", "name", b"name", "path", b"path"
+            "extension",
+            b"extension",
+            "name",
+            b"name",
+            "path",
+            b"path",
+            "qualified_name",
+            b"qualified_name",
         ],
     ) -> None: ...
 
