@@ -149,6 +149,8 @@ message GraphCodeIndex {
     string docstring = 3;
     int32 start_line = 4;
     int32 end_line = 5;
+    int32 start_char = 8;
+    int32 end_char = 9;
     repeated string decorators = 6;
     bool is_exported = 7;
   }
@@ -161,6 +163,8 @@ message GraphCodeIndex {
     string docstring = 3;
     int32 start_line = 4;
     int32 end_line = 5;
+    int32 start_char = 7;
+    int32 end_char = 8;
     repeated string decorators = 6;
   }
 
@@ -172,6 +176,8 @@ message GraphCodeIndex {
     string docstring = 3;
     int32 start_line = 4;
     int32 end_line = 5;
+    int32 start_char = 8;
+    int32 end_char = 9;
     repeated string decorators = 6;
     bool is_exported = 7;
   }

@@ -684,7 +684,9 @@ class DefinitionProcessor:
                 "name": func_name,
                 "decorators": decorators,
                 "start_line": func_node.start_point[0] + 1,
+                "start_char": func_node.start_point[1],
                 "end_line": func_node.end_point[0] + 1,
+                "end_char": func_node.end_point[1],
                 "docstring": self._get_docstring(func_node),
                 "is_exported": is_exported,
             }
@@ -1094,6 +1096,8 @@ class DefinitionProcessor:
                 "decorators": decorators,
                 "start_line": class_node.start_point[0] + 1,
                 "end_line": class_node.end_point[0] + 1,
+                "start_char": class_node.start_point[1],
+                "end_char": class_node.end_point[1],
                 "docstring": self._get_docstring(class_node),
                 "is_exported": is_exported,
             }
@@ -1722,6 +1726,8 @@ class DefinitionProcessor:
                         "name": method_name,
                         "start_line": func_node.start_point[0] + 1,
                         "end_line": func_node.end_point[0] + 1,
+                        "start_char": func_node.start_point[1],
+                        "end_char": func_node.end_point[1],
                         "docstring": self._get_docstring(func_node),
                     }
                     logger.info(
@@ -2002,6 +2008,8 @@ class DefinitionProcessor:
                                 "name": method_name,
                                 "start_line": method_func_node.start_point[0] + 1,
                                 "end_line": method_func_node.end_point[0] + 1,
+                                "start_char": method_func_node.start_point[1],
+                                "end_char": method_func_node.end_point[1],
                                 "docstring": self._get_docstring(method_func_node),
                             }
                             logger.info(
@@ -2282,6 +2290,8 @@ class DefinitionProcessor:
                                 "name": function_name,
                                 "start_line": arrow_function.start_point[0] + 1,
                                 "end_line": arrow_function.end_point[0] + 1,
+                                "start_char": arrow_function.start_point[1],
+                                "end_char": arrow_function.end_point[1],
                                 "docstring": self._get_docstring(arrow_function),
                             }
 
@@ -2325,6 +2335,8 @@ class DefinitionProcessor:
                                     "name": function_name,
                                     "start_line": arrow_function.start_point[0] + 1,
                                     "end_line": arrow_function.end_point[0] + 1,
+                                    "start_char": arrow_function.start_point[1],
+                                    "end_char": arrow_function.end_point[1],
                                     "docstring": self._get_docstring(arrow_function),
                                 }
 
@@ -2368,6 +2380,8 @@ class DefinitionProcessor:
                                     "name": function_name,
                                     "start_line": function_expr.start_point[0] + 1,
                                     "end_line": function_expr.end_point[0] + 1,
+                                    "start_char": function_expr.start_point[1],
+                                    "end_char": function_expr.end_point[1],
                                     "docstring": self._get_docstring(function_expr),
                                 }
 

@@ -143,7 +143,9 @@ def ingest_method(
         "name": method_name,
         "decorators": decorators,
         "start_line": method_node.start_point[0] + 1,
+        "start_char": method_node.start_point[1],
         "end_line": method_node.end_point[0] + 1,
+        "end_char": method_node.end_point[1],
         "docstring": get_docstring_func(method_node),
     }
 
@@ -197,6 +199,8 @@ def ingest_exported_function(
         "name": function_name,
         "start_line": function_node.start_point[0] + 1,
         "end_line": function_node.end_point[0] + 1,
+        "start_char": function_node.start_point[1],
+        "end_char": function_node.end_point[1],
         "docstring": get_docstring_func(function_node),
     }
 
