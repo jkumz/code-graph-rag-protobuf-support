@@ -32,29 +32,16 @@ class GraphCodeIndex(google.protobuf.message.Message):
     NODES_FIELD_NUMBER: builtins.int
     RELATIONSHIPS_FIELD_NUMBER: builtins.int
     @property
-    def nodes(
-        self,
-    ) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[
-        global___Node
-    ]: ...
+    def nodes(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___Node]: ...
     @property
-    def relationships(
-        self,
-    ) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[
-        global___Relationship
-    ]: ...
+    def relationships(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___Relationship]: ...
     def __init__(
         self,
         *,
         nodes: collections.abc.Iterable[global___Node] | None = ...,
         relationships: collections.abc.Iterable[global___Relationship] | None = ...,
     ) -> None: ...
-    def ClearField(
-        self,
-        field_name: typing.Literal[
-            "nodes", b"nodes", "relationships", b"relationships"
-        ],
-    ) -> None: ...
+    def ClearField(self, field_name: typing.Literal["nodes", b"nodes", "relationships", b"relationships"]) -> None: ...
 
 global___GraphCodeIndex = GraphCodeIndex
 
@@ -119,87 +106,9 @@ class Node(google.protobuf.message.Message):
         module_interface: global___ModuleInterface | None = ...,
         path: global___Path | None = ...,
     ) -> None: ...
-    def HasField(
-        self,
-        field_name: typing.Literal[
-            "class",
-            b"class",
-            "external_package",
-            b"external_package",
-            "file",
-            b"file",
-            "folder",
-            b"folder",
-            "function",
-            b"function",
-            "method",
-            b"method",
-            "module",
-            b"module",
-            "module_implementation",
-            b"module_implementation",
-            "module_interface",
-            b"module_interface",
-            "package",
-            b"package",
-            "path",
-            b"path",
-            "payload",
-            b"payload",
-            "project",
-            b"project",
-        ],
-    ) -> builtins.bool: ...
-    def ClearField(
-        self,
-        field_name: typing.Literal[
-            "class",
-            b"class",
-            "external_package",
-            b"external_package",
-            "file",
-            b"file",
-            "folder",
-            b"folder",
-            "function",
-            b"function",
-            "method",
-            b"method",
-            "module",
-            b"module",
-            "module_implementation",
-            b"module_implementation",
-            "module_interface",
-            b"module_interface",
-            "package",
-            b"package",
-            "path",
-            b"path",
-            "payload",
-            b"payload",
-            "project",
-            b"project",
-        ],
-    ) -> None: ...
-    def WhichOneof(
-        self, oneof_group: typing.Literal["payload", b"payload"]
-    ) -> (
-        typing.Literal[
-            "project",
-            "package",
-            "folder",
-            "module",
-            "class",
-            "function",
-            "method",
-            "file",
-            "external_package",
-            "module_implementation",
-            "module_interface",
-            "path",
-        ]
-        | None
-    ): ...
+    def HasField(self, field_name: typing.Literal["class", b"class", "external_package", b"external_package", "file", b"file", "folder", b"folder", "function", b"function", "method", b"method", "module", b"module", "module_implementation", b"module_implementation", "module_interface", b"module_interface", "package", b"package", "path", b"path", "payload", b"payload", "project", b"project"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing.Literal["class", b"class", "external_package", b"external_package", "file", b"file", "folder", b"folder", "function", b"function", "method", b"method", "module", b"module", "module_implementation", b"module_implementation", "module_interface", b"module_interface", "package", b"package", "path", b"path", "payload", b"payload", "project", b"project"]) -> None: ...
+    def WhichOneof(self, oneof_group: typing.Literal["payload", b"payload"]) -> typing.Literal["project", "package", "folder", "module", "class", "function", "method", "file", "external_package", "module_implementation", "module_interface", "path"] | None: ...
 
 global___Node = Node
 
@@ -215,12 +124,7 @@ class Relationship(google.protobuf.message.Message):
         ValueType = typing.NewType("ValueType", builtins.int)
         V: typing_extensions.TypeAlias = ValueType
 
-    class _RelationshipTypeEnumTypeWrapper(
-        google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[
-            Relationship._RelationshipType.ValueType
-        ],
-        builtins.type,
-    ):
+    class _RelationshipTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[Relationship._RelationshipType.ValueType], builtins.type):
         DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
         RELATIONSHIP_TYPE_UNSPECIFIED: Relationship._RelationshipType.ValueType  # 0
         CONTAINS_PACKAGE: Relationship._RelationshipType.ValueType  # 1
@@ -239,9 +143,7 @@ class Relationship(google.protobuf.message.Message):
         AT_PATH: Relationship._RelationshipType.ValueType  # 14
         BELONGS_TO: Relationship._RelationshipType.ValueType  # 15
 
-    class RelationshipType(
-        _RelationshipType, metaclass=_RelationshipTypeEnumTypeWrapper
-    ): ...
+    class RelationshipType(_RelationshipType, metaclass=_RelationshipTypeEnumTypeWrapper): ...
     RELATIONSHIP_TYPE_UNSPECIFIED: Relationship.RelationshipType.ValueType  # 0
     CONTAINS_PACKAGE: Relationship.RelationshipType.ValueType  # 1
     CONTAINS_FOLDER: Relationship.RelationshipType.ValueType  # 2
@@ -286,26 +188,8 @@ class Relationship(google.protobuf.message.Message):
         source_label: builtins.str = ...,
         target_label: builtins.str = ...,
     ) -> None: ...
-    def HasField(
-        self, field_name: typing.Literal["properties", b"properties"]
-    ) -> builtins.bool: ...
-    def ClearField(
-        self,
-        field_name: typing.Literal[
-            "properties",
-            b"properties",
-            "source_id",
-            b"source_id",
-            "source_label",
-            b"source_label",
-            "target_id",
-            b"target_id",
-            "target_label",
-            b"target_label",
-            "type",
-            b"type",
-        ],
-    ) -> None: ...
+    def HasField(self, field_name: typing.Literal["properties", b"properties"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing.Literal["properties", b"properties", "source_id", b"source_id", "source_label", b"source_label", "target_id", b"target_id", "target_label", b"target_label", "type", b"type"]) -> None: ...
 
 global___Relationship = Relationship
 
@@ -348,12 +232,7 @@ class Package(google.protobuf.message.Message):
         name: builtins.str = ...,
         path: builtins.str = ...,
     ) -> None: ...
-    def ClearField(
-        self,
-        field_name: typing.Literal[
-            "name", b"name", "path", b"path", "qualified_name", b"qualified_name"
-        ],
-    ) -> None: ...
+    def ClearField(self, field_name: typing.Literal["name", b"name", "path", b"path", "qualified_name", b"qualified_name"]) -> None: ...
 
 global___Package = Package
 
@@ -375,12 +254,7 @@ class Folder(google.protobuf.message.Message):
         name: builtins.str = ...,
         qualified_name: builtins.str = ...,
     ) -> None: ...
-    def ClearField(
-        self,
-        field_name: typing.Literal[
-            "name", b"name", "path", b"path", "qualified_name", b"qualified_name"
-        ],
-    ) -> None: ...
+    def ClearField(self, field_name: typing.Literal["name", b"name", "path", b"path", "qualified_name", b"qualified_name"]) -> None: ...
 
 global___Folder = Folder
 
@@ -405,19 +279,7 @@ class File(google.protobuf.message.Message):
         extension: builtins.str = ...,
         qualified_name: builtins.str = ...,
     ) -> None: ...
-    def ClearField(
-        self,
-        field_name: typing.Literal[
-            "extension",
-            b"extension",
-            "name",
-            b"name",
-            "path",
-            b"path",
-            "qualified_name",
-            b"qualified_name",
-        ],
-    ) -> None: ...
+    def ClearField(self, field_name: typing.Literal["extension", b"extension", "name", b"name", "path", b"path", "qualified_name", b"qualified_name"]) -> None: ...
 
 global___File = File
 
@@ -439,12 +301,7 @@ class Module(google.protobuf.message.Message):
         name: builtins.str = ...,
         path: builtins.str = ...,
     ) -> None: ...
-    def ClearField(
-        self,
-        field_name: typing.Literal[
-            "name", b"name", "path", b"path", "qualified_name", b"qualified_name"
-        ],
-    ) -> None: ...
+    def ClearField(self, field_name: typing.Literal["name", b"name", "path", b"path", "qualified_name", b"qualified_name"]) -> None: ...
 
 global___Module = Module
 
@@ -471,19 +328,7 @@ class ModuleImplementation(google.protobuf.message.Message):
         path: builtins.str = ...,
         implements_module: builtins.str = ...,
     ) -> None: ...
-    def ClearField(
-        self,
-        field_name: typing.Literal[
-            "implements_module",
-            b"implements_module",
-            "name",
-            b"name",
-            "path",
-            b"path",
-            "qualified_name",
-            b"qualified_name",
-        ],
-    ) -> None: ...
+    def ClearField(self, field_name: typing.Literal["implements_module", b"implements_module", "name", b"name", "path", b"path", "qualified_name", b"qualified_name"]) -> None: ...
 
 global___ModuleImplementation = ModuleImplementation
 
@@ -507,12 +352,7 @@ class ModuleInterface(google.protobuf.message.Message):
         name: builtins.str = ...,
         path: builtins.str = ...,
     ) -> None: ...
-    def ClearField(
-        self,
-        field_name: typing.Literal[
-            "name", b"name", "path", b"path", "qualified_name", b"qualified_name"
-        ],
-    ) -> None: ...
+    def ClearField(self, field_name: typing.Literal["name", b"name", "path", b"path", "qualified_name", b"qualified_name"]) -> None: ...
 
 global___ModuleInterface = ModuleInterface
 
@@ -541,6 +381,8 @@ class Function(google.protobuf.message.Message):
     DOCSTRING_FIELD_NUMBER: builtins.int
     START_LINE_FIELD_NUMBER: builtins.int
     END_LINE_FIELD_NUMBER: builtins.int
+    START_CHAR_FIELD_NUMBER: builtins.int
+    END_CHAR_FIELD_NUMBER: builtins.int
     DECORATORS_FIELD_NUMBER: builtins.int
     IS_EXPORTED_FIELD_NUMBER: builtins.int
     qualified_name: builtins.str
@@ -549,13 +391,11 @@ class Function(google.protobuf.message.Message):
     docstring: builtins.str
     start_line: builtins.int
     end_line: builtins.int
+    start_char: builtins.int
+    end_char: builtins.int
     is_exported: builtins.bool
     @property
-    def decorators(
-        self,
-    ) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[
-        builtins.str
-    ]: ...
+    def decorators(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.str]: ...
     def __init__(
         self,
         *,
@@ -564,28 +404,12 @@ class Function(google.protobuf.message.Message):
         docstring: builtins.str = ...,
         start_line: builtins.int = ...,
         end_line: builtins.int = ...,
+        start_char: builtins.int = ...,
+        end_char: builtins.int = ...,
         decorators: collections.abc.Iterable[builtins.str] | None = ...,
         is_exported: builtins.bool = ...,
     ) -> None: ...
-    def ClearField(
-        self,
-        field_name: typing.Literal[
-            "decorators",
-            b"decorators",
-            "docstring",
-            b"docstring",
-            "end_line",
-            b"end_line",
-            "is_exported",
-            b"is_exported",
-            "name",
-            b"name",
-            "qualified_name",
-            b"qualified_name",
-            "start_line",
-            b"start_line",
-        ],
-    ) -> None: ...
+    def ClearField(self, field_name: typing.Literal["decorators", b"decorators", "docstring", b"docstring", "end_char", b"end_char", "end_line", b"end_line", "is_exported", b"is_exported", "name", b"name", "qualified_name", b"qualified_name", "start_char", b"start_char", "start_line", b"start_line"]) -> None: ...
 
 global___Function = Function
 
@@ -598,6 +422,8 @@ class Method(google.protobuf.message.Message):
     DOCSTRING_FIELD_NUMBER: builtins.int
     START_LINE_FIELD_NUMBER: builtins.int
     END_LINE_FIELD_NUMBER: builtins.int
+    START_CHAR_FIELD_NUMBER: builtins.int
+    END_CHAR_FIELD_NUMBER: builtins.int
     DECORATORS_FIELD_NUMBER: builtins.int
     qualified_name: builtins.str
     """Primary Key"""
@@ -605,12 +431,10 @@ class Method(google.protobuf.message.Message):
     docstring: builtins.str
     start_line: builtins.int
     end_line: builtins.int
+    start_char: builtins.int
+    end_char: builtins.int
     @property
-    def decorators(
-        self,
-    ) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[
-        builtins.str
-    ]: ...
+    def decorators(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.str]: ...
     def __init__(
         self,
         *,
@@ -619,25 +443,11 @@ class Method(google.protobuf.message.Message):
         docstring: builtins.str = ...,
         start_line: builtins.int = ...,
         end_line: builtins.int = ...,
+        start_char: builtins.int = ...,
+        end_char: builtins.int = ...,
         decorators: collections.abc.Iterable[builtins.str] | None = ...,
     ) -> None: ...
-    def ClearField(
-        self,
-        field_name: typing.Literal[
-            "decorators",
-            b"decorators",
-            "docstring",
-            b"docstring",
-            "end_line",
-            b"end_line",
-            "name",
-            b"name",
-            "qualified_name",
-            b"qualified_name",
-            "start_line",
-            b"start_line",
-        ],
-    ) -> None: ...
+    def ClearField(self, field_name: typing.Literal["decorators", b"decorators", "docstring", b"docstring", "end_char", b"end_char", "end_line", b"end_line", "name", b"name", "qualified_name", b"qualified_name", "start_char", b"start_char", "start_line", b"start_line"]) -> None: ...
 
 global___Method = Method
 
@@ -650,6 +460,8 @@ class Class(google.protobuf.message.Message):
     DOCSTRING_FIELD_NUMBER: builtins.int
     START_LINE_FIELD_NUMBER: builtins.int
     END_LINE_FIELD_NUMBER: builtins.int
+    START_CHAR_FIELD_NUMBER: builtins.int
+    END_CHAR_FIELD_NUMBER: builtins.int
     DECORATORS_FIELD_NUMBER: builtins.int
     IS_EXPORTED_FIELD_NUMBER: builtins.int
     qualified_name: builtins.str
@@ -658,13 +470,11 @@ class Class(google.protobuf.message.Message):
     docstring: builtins.str
     start_line: builtins.int
     end_line: builtins.int
+    start_char: builtins.int
+    end_char: builtins.int
     is_exported: builtins.bool
     @property
-    def decorators(
-        self,
-    ) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[
-        builtins.str
-    ]: ...
+    def decorators(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.str]: ...
     def __init__(
         self,
         *,
@@ -673,28 +483,12 @@ class Class(google.protobuf.message.Message):
         docstring: builtins.str = ...,
         start_line: builtins.int = ...,
         end_line: builtins.int = ...,
+        start_char: builtins.int = ...,
+        end_char: builtins.int = ...,
         decorators: collections.abc.Iterable[builtins.str] | None = ...,
         is_exported: builtins.bool = ...,
     ) -> None: ...
-    def ClearField(
-        self,
-        field_name: typing.Literal[
-            "decorators",
-            b"decorators",
-            "docstring",
-            b"docstring",
-            "end_line",
-            b"end_line",
-            "is_exported",
-            b"is_exported",
-            "name",
-            b"name",
-            "qualified_name",
-            b"qualified_name",
-            "start_line",
-            b"start_line",
-        ],
-    ) -> None: ...
+    def ClearField(self, field_name: typing.Literal["decorators", b"decorators", "docstring", b"docstring", "end_char", b"end_char", "end_line", b"end_line", "is_exported", b"is_exported", "name", b"name", "qualified_name", b"qualified_name", "start_char", b"start_char", "start_line", b"start_line"]) -> None: ...
 
 global___Class = Class
 
@@ -713,11 +507,6 @@ class Path(google.protobuf.message.Message):
         qualified_name: builtins.str = ...,
         path: builtins.str = ...,
     ) -> None: ...
-    def ClearField(
-        self,
-        field_name: typing.Literal[
-            "path", b"path", "qualified_name", b"qualified_name"
-        ],
-    ) -> None: ...
+    def ClearField(self, field_name: typing.Literal["path", b"path", "qualified_name", b"qualified_name"]) -> None: ...
 
 global___Path = Path
