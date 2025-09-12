@@ -27,7 +27,7 @@ from .java_utils import extract_java_method_info
 from .lua_utils import extract_lua_assigned_name
 from .python_utils import resolve_class_name
 from .rust_utils import build_rust_module_path, extract_rust_impl_target
-from .utils import ingest_exported_function, ingest_method
+from .utils import generate_range_id, ingest_exported_function, ingest_method
 
 # Common language constants for performance optimization
 _JS_TYPESCRIPT_LANGUAGES = {"javascript", "typescript"}
@@ -187,15 +187,25 @@ class DefinitionProcessor:
                 self._ingest_cpp_module_declarations(
                     root_node, module_qn, file_path, queries
                 )
-            self._ingest_all_functions(root_node, module_qn, language, queries)
-            self._ingest_classes_and_methods(root_node, module_qn, language, queries)
-            self._ingest_object_literal_methods(root_node, module_qn, language, queries)
-            self._ingest_commonjs_exports(root_node, module_qn, language, queries)
+            self._ingest_all_functions(
+                root_node, module_qn, language, queries, str(relative_path)
+            )
+            self._ingest_classes_and_methods(
+                root_node, module_qn, language, queries, str(relative_path)
+            )
+            self._ingest_object_literal_methods(
+                root_node, module_qn, language, queries, str(relative_path)
+            )
+            self._ingest_commonjs_exports(
+                root_node, module_qn, language, queries, str(relative_path)
+            )
             self._ingest_es6_exports(root_node, module_qn, language, queries)
             self._ingest_assignment_arrow_functions(
-                root_node, module_qn, language, queries
+                root_node, module_qn, language, queries, str(relative_path)
             )
-            self._ingest_prototype_inheritance(root_node, module_qn, language, queries)
+            self._ingest_prototype_inheritance(
+                root_node, module_qn, language, queries, str(relative_path)
+            )
 
             return root_node, language
 
@@ -610,7 +620,12 @@ class DefinitionProcessor:
         )
 
     def _ingest_all_functions(
-        self, root_node: Node, module_qn: str, language: str, queries: dict[str, Any]
+        self,
+        root_node: Node,
+        module_qn: str,
+        language: str,
+        queries: dict[str, Any],
+        file_path: str | None = None,
     ) -> None:
         """Extract and ingest all functions (including nested ones)."""
         lang_queries = queries[language]
@@ -679,14 +694,22 @@ class DefinitionProcessor:
 
             # Extract function properties
             decorators = self._extract_decorators(func_node)
+
+            range_id = generate_range_id(
+                self.project_name,
+                str(file_path),
+                func_node.start_point[0] + 1,
+                func_node.start_point[1],
+                func_node.end_point[0] + 1,
+                func_node.end_point[1],
+            )
             func_props: dict[str, Any] = {
                 "qualified_name": func_qn,
                 "name": func_name,
                 "decorators": decorators,
                 "start_line": func_node.start_point[0] + 1,
-                "start_char": func_node.start_point[1],
                 "end_line": func_node.end_point[0] + 1,
-                "end_char": func_node.end_point[1],
+                "range_id": range_id,
                 "docstring": self._get_docstring(func_node),
                 "is_exported": is_exported,
             }
@@ -715,11 +738,18 @@ class DefinitionProcessor:
                 )
 
     def _ingest_top_level_functions(
-        self, root_node: Node, module_qn: str, language: str, queries: dict[str, Any]
+        self,
+        root_node: Node,
+        module_qn: str,
+        language: str,
+        queries: dict[str, Any],
+        file_path: str | None = None,
     ) -> None:
         """Extract and ingest top-level functions. (Legacy method, replaced by _ingest_all_functions)"""
         # Keep for backward compatibility, but delegate to new method
-        self._ingest_all_functions(root_node, module_qn, language, queries)
+        self._ingest_all_functions(
+            root_node, module_qn, language, queries, str(file_path)
+        )
 
     def _build_nested_qualified_name(
         self,
@@ -1004,7 +1034,12 @@ class DefinitionProcessor:
         return exported_class_nodes
 
     def _ingest_classes_and_methods(
-        self, root_node: Node, module_qn: str, language: str, queries: dict[str, Any]
+        self,
+        root_node: Node,
+        module_qn: str,
+        language: str,
+        queries: dict[str, Any],
+        file_path: str | None = None,
     ) -> None:
         """Extract and ingest classes and their methods."""
         lang_queries = queries[language]
@@ -1066,6 +1101,15 @@ class DefinitionProcessor:
                         if not isinstance(method_node, Node):
                             continue
 
+                        range_id = generate_range_id(
+                            self.project_name,
+                            str(file_path),
+                            method_node.start_point[0] + 1,
+                            method_node.start_point[1],
+                            method_node.end_point[0] + 1,
+                            method_node.end_point[1],
+                        )
+
                         ingest_method(
                             method_node,
                             class_qn,
@@ -1075,6 +1119,7 @@ class DefinitionProcessor:
                             self.simple_name_lookup,
                             self._get_docstring,
                             language,
+                            range_id=range_id,
                         )
 
                 # Skip the rest of the processing for impl blocks
@@ -1090,14 +1135,23 @@ class DefinitionProcessor:
                 )
                 class_qn = nested_qn if nested_qn else f"{module_qn}.{class_name}"
             decorators = self._extract_decorators(class_node)
+
+            range_id = generate_range_id(
+                self.project_name,
+                str(file_path),
+                class_node.start_point[0] + 1,
+                class_node.start_point[1],
+                class_node.end_point[0] + 1,
+                class_node.end_point[1],
+            )
+
             class_props: dict[str, Any] = {
                 "qualified_name": class_qn,
                 "name": class_name,
                 "decorators": decorators,
                 "start_line": class_node.start_point[0] + 1,
                 "end_line": class_node.end_point[0] + 1,
-                "start_char": class_node.start_point[1],
-                "end_char": class_node.end_point[1],
+                "range_id": range_id,
                 "docstring": self._get_docstring(class_node),
                 "is_exported": is_exported,
             }
@@ -1224,6 +1278,15 @@ class DefinitionProcessor:
                             # No parameters, use simple name
                             method_qualified_name = f"{class_qn}.{method_name}()"
 
+                range_id = generate_range_id(
+                    self.project_name,
+                    str(file_path),
+                    method_node.start_point[0] + 1,
+                    method_node.start_point[1],
+                    method_node.end_point[0] + 1,
+                    method_node.end_point[1],
+                )
+
                 ingest_method(
                     method_node,
                     class_qn,
@@ -1235,6 +1298,7 @@ class DefinitionProcessor:
                     language,
                     self._extract_decorators,
                     method_qualified_name,
+                    range_id=range_id,
                 )
 
                 # Note: OVERRIDES relationships will be processed later after all methods are collected
@@ -1586,7 +1650,12 @@ class DefinitionProcessor:
         )
 
     def _ingest_prototype_inheritance(
-        self, root_node: Node, module_qn: str, language: str, queries: dict[str, Any]
+        self,
+        root_node: Node,
+        module_qn: str,
+        language: str,
+        queries: dict[str, Any],
+        file_path: str | None = None,
     ) -> None:
         """Detect JavaScript prototype inheritance patterns using tree-sitter queries."""
         if language not in _JS_TYPESCRIPT_LANGUAGES:
@@ -1599,7 +1668,7 @@ class DefinitionProcessor:
 
         # Handle prototype method assignments
         self._ingest_prototype_method_assignments(
-            root_node, module_qn, language, queries
+            root_node, module_qn, language, queries, file_path
         )
 
     def _ingest_prototype_inheritance_links(
@@ -1672,7 +1741,12 @@ class DefinitionProcessor:
             logger.debug(f"Failed to detect prototype inheritance: {e}")
 
     def _ingest_prototype_method_assignments(
-        self, root_node: Node, module_qn: str, language: str, queries: dict[str, Any]
+        self,
+        root_node: Node,
+        module_qn: str,
+        language: str,
+        queries: dict[str, Any],
+        file_path: str | None = None,
     ) -> None:
         """Detect prototype method assignments (Constructor.prototype.method = function() {})."""
         lang_queries = queries[language]
@@ -1720,14 +1794,22 @@ class DefinitionProcessor:
                     constructor_qn = f"{module_qn}.{constructor_name}"
                     method_qn = f"{constructor_qn}.{method_name}"
 
+                    range_id = generate_range_id(
+                        self.project_name,
+                        str(file_path),
+                        func_node.start_point[0] + 1,
+                        func_node.start_point[1],
+                        func_node.end_point[0] + 1,
+                        func_node.end_point[1],
+                    )
+
                     # Create Function node for prototype method
                     method_props = {
                         "qualified_name": method_qn,
                         "name": method_name,
                         "start_line": func_node.start_point[0] + 1,
                         "end_line": func_node.end_point[0] + 1,
-                        "start_char": func_node.start_point[1],
-                        "end_char": func_node.end_point[1],
+                        "range_id": range_id,
                         "docstring": self._get_docstring(func_node),
                     }
                     logger.info(
@@ -1924,7 +2006,12 @@ class DefinitionProcessor:
             logger.debug(f"Failed to process CommonJS import {imported_name}: {e}")
 
     def _ingest_object_literal_methods(
-        self, root_node: Node, module_qn: str, language: str, queries: dict[str, Any]
+        self,
+        root_node: Node,
+        module_qn: str,
+        language: str,
+        queries: dict[str, Any],
+        path: str | None = None,
     ) -> None:
         """Detect and ingest methods defined in object literals."""
         if language not in _JS_TYPESCRIPT_LANGUAGES:
@@ -2002,14 +2089,22 @@ class DefinitionProcessor:
                                 else:
                                     method_qn = f"{module_qn}.{method_name}"
 
+                            range_id = generate_range_id(
+                                self.project_name,
+                                str(path),
+                                method_func_node.start_point[0] + 1,
+                                method_func_node.start_point[1],
+                                method_func_node.end_point[0] + 1,
+                                method_func_node.end_point[1],
+                            )
+
                             # Create Function node for object literal method
                             method_props = {
                                 "qualified_name": method_qn,
                                 "name": method_name,
                                 "start_line": method_func_node.start_point[0] + 1,
                                 "end_line": method_func_node.end_point[0] + 1,
-                                "start_char": method_func_node.start_point[1],
-                                "end_char": method_func_node.end_point[1],
+                                "range_id": range_id,
                                 "docstring": self._get_docstring(method_func_node),
                             }
                             logger.info(
@@ -2035,7 +2130,12 @@ class DefinitionProcessor:
             logger.debug(f"Failed to detect object literal methods: {e}")
 
     def _ingest_commonjs_exports(
-        self, root_node: Node, module_qn: str, language: str, queries: dict[str, Any]
+        self,
+        root_node: Node,
+        module_qn: str,
+        language: str,
+        queries: dict[str, Any],
+        path: str | None = None,
     ) -> None:
         """Detect and ingest CommonJS exports as function definitions."""
         if language not in _JS_TYPESCRIPT_LANGUAGES:
@@ -2089,6 +2189,14 @@ class DefinitionProcessor:
                             and exports_obj.text.decode("utf8") == "exports"
                         ):
                             function_name = export_name.text.decode("utf8")
+                            range_id = generate_range_id(
+                                self.project_name,
+                                str(path),
+                                export_function.start_point[0] + 1,
+                                export_function.start_point[1],
+                                export_function.end_point[0] + 1,
+                                export_function.end_point[1],
+                            )
                             ingest_exported_function(
                                 export_function,
                                 function_name,
@@ -2099,6 +2207,7 @@ class DefinitionProcessor:
                                 self.simple_name_lookup,
                                 self._get_docstring,
                                 self._is_export_inside_function,
+                                range_id=range_id,
                             )
 
                     # Process module.exports.name = function patterns
@@ -2118,6 +2227,14 @@ class DefinitionProcessor:
                             and exports_prop.text.decode("utf8") == "exports"
                         ):
                             function_name = export_name.text.decode("utf8")
+                            range_id = generate_range_id(
+                                self.project_name,
+                                str(path),
+                                export_function.start_point[0] + 1,
+                                export_function.start_point[1],
+                                export_function.end_point[0] + 1,
+                                export_function.end_point[1],
+                            )
                             ingest_exported_function(
                                 export_function,
                                 function_name,
@@ -2128,6 +2245,7 @@ class DefinitionProcessor:
                                 self.simple_name_lookup,
                                 self._get_docstring,
                                 self._is_export_inside_function,
+                                range_id=range_id,
                             )
 
                 except Exception as e:
@@ -2137,7 +2255,12 @@ class DefinitionProcessor:
             logger.debug(f"Failed to detect CommonJS exports: {e}")
 
     def _ingest_es6_exports(
-        self, root_node: Node, module_qn: str, language: str, queries: dict[str, Any]
+        self,
+        root_node: Node,
+        module_qn: str,
+        language: str,
+        queries: dict[str, Any],
+        path: str | None = None,
     ) -> None:
         """Detect and ingest ES6 export statements as function definitions."""
         try:
@@ -2173,6 +2296,14 @@ class DefinitionProcessor:
                         export_names, export_functions
                     ):
                         if export_name.text and export_function:
+                            range_id = generate_range_id(
+                                self.project_name,
+                                str(path),
+                                export_function.start_point[0] + 1,
+                                export_function.start_point[1],
+                                export_function.end_point[0] + 1,
+                                export_function.end_point[1],
+                            )
                             function_name = export_name.text.decode("utf8")
                             ingest_exported_function(
                                 export_function,
@@ -2184,6 +2315,7 @@ class DefinitionProcessor:
                                 self.simple_name_lookup,
                                 self._get_docstring,
                                 self._is_export_inside_function,
+                                range_id=range_id,
                             )
 
                     # Process export function patterns (function declarations)
@@ -2196,6 +2328,14 @@ class DefinitionProcessor:
                                 ):
                                     if name_node.text:
                                         function_name = name_node.text.decode("utf8")
+                                        range_id = generate_range_id(
+                                            self.project_name,
+                                            str(path),
+                                            export_function.start_point[0] + 1,
+                                            export_function.start_point[1],
+                                            export_function.end_point[0] + 1,
+                                            export_function.end_point[1],
+                                        )
                                         ingest_exported_function(
                                             export_function,
                                             function_name,
@@ -2206,6 +2346,7 @@ class DefinitionProcessor:
                                             self.simple_name_lookup,
                                             self._get_docstring,
                                             self._is_export_inside_function,
+                                            range_id=range_id,
                                         )
 
                 except Exception as e:
@@ -2215,7 +2356,12 @@ class DefinitionProcessor:
             logger.debug(f"Failed to detect ES6 exports: {e}")
 
     def _ingest_assignment_arrow_functions(
-        self, root_node: Node, module_qn: str, language: str, queries: dict[str, Any]
+        self,
+        root_node: Node,
+        module_qn: str,
+        language: str,
+        queries: dict[str, Any],
+        path: str | None = None,
     ) -> None:
         """Detect arrow functions in assignment expressions and object literals."""
         # Only apply to JavaScript/TypeScript
@@ -2285,13 +2431,21 @@ class DefinitionProcessor:
                             else:
                                 function_qn = f"{module_qn}.{function_name}"
 
+                            range_id = generate_range_id(
+                                self.project_name,
+                                str(path),
+                                arrow_function.start_point[0] + 1,
+                                arrow_function.start_point[1],
+                                arrow_function.end_point[0] + 1,
+                                arrow_function.end_point[1],
+                            )
+
                             function_props = {
                                 "qualified_name": function_qn,
                                 "name": function_name,
                                 "start_line": arrow_function.start_point[0] + 1,
                                 "end_line": arrow_function.end_point[0] + 1,
-                                "start_char": arrow_function.start_point[1],
-                                "end_char": arrow_function.end_point[1],
+                                "range_id": range_id,
                                 "docstring": self._get_docstring(arrow_function),
                             }
 
@@ -2330,13 +2484,21 @@ class DefinitionProcessor:
                                 else:
                                     function_qn = f"{module_qn}.{function_name}"
 
+                                range_id = generate_range_id(
+                                    self.project_name,
+                                    str(path),
+                                    arrow_function.start_point[0] + 1,
+                                    arrow_function.start_point[1],
+                                    arrow_function.end_point[0] + 1,
+                                    arrow_function.end_point[1],
+                                )
+
                                 function_props = {
                                     "qualified_name": function_qn,
                                     "name": function_name,
                                     "start_line": arrow_function.start_point[0] + 1,
                                     "end_line": arrow_function.end_point[0] + 1,
-                                    "start_char": arrow_function.start_point[1],
-                                    "end_char": arrow_function.end_point[1],
+                                    "range_id": range_id,
                                     "docstring": self._get_docstring(arrow_function),
                                 }
 
@@ -2375,13 +2537,21 @@ class DefinitionProcessor:
                                 else:
                                     function_qn = f"{module_qn}.{function_name}"
 
+                                range_id = generate_range_id(
+                                    self.project_name,
+                                    str(path),
+                                    function_expr.start_point[0] + 1,
+                                    function_expr.start_point[1],
+                                    function_expr.end_point[0] + 1,
+                                    function_expr.end_point[1],
+                                )
+
                                 function_props = {
                                     "qualified_name": function_qn,
                                     "name": function_name,
                                     "start_line": function_expr.start_point[0] + 1,
                                     "end_line": function_expr.end_point[0] + 1,
-                                    "start_char": function_expr.start_point[1],
-                                    "end_char": function_expr.end_point[1],
+                                    "range_id": range_id,
                                     "docstring": self._get_docstring(function_expr),
                                 }
 
