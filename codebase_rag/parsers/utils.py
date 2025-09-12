@@ -3,6 +3,7 @@
 from functools import lru_cache
 from typing import TYPE_CHECKING, Any
 
+import xxhash
 from loguru import logger
 from tree_sitter import Node, QueryCursor
 
@@ -93,6 +94,7 @@ def ingest_method(
     language: str = "",
     extract_decorators_func: Any = None,
     method_qualified_name: str | None = None,
+    range_id: str | None = None,
 ) -> None:
     """Ingest a method node into the graph database.
 
@@ -107,6 +109,7 @@ def ingest_method(
         language: The programming language (used for C++ specific handling).
         extract_decorators_func: Optional function to extract decorators.
         method_qualified_name: Optional pre-computed qualified name to use instead of generating one.
+        range_id: The unique project + file path + location ID of a function/method
     """
     # Extract method name based on language
     if language == "cpp":
@@ -172,6 +175,7 @@ def ingest_exported_function(
     simple_name_lookup: dict[str, set[str]],
     get_docstring_func: Any,
     is_export_inside_function_func: Any,
+    range_id: str | None = None,
 ) -> None:
     """Ingest an exported function into the graph database.
 
@@ -187,6 +191,8 @@ def ingest_exported_function(
         simple_name_lookup: Lookup table for simple names to qualified names.
         get_docstring_func: Function to extract docstring from a node.
         is_export_inside_function_func: Function to check if export is inside a function.
+        range_id: The unique project + file path + location ID of a function/method
+
     """
     # Skip if this export is inside a function (let regular processing handle it)
     if is_export_inside_function_func(function_node):
@@ -208,3 +214,29 @@ def ingest_exported_function(
     ingestor.ensure_node_batch("Function", function_props)
     function_registry[function_qn] = "Function"
     simple_name_lookup[function_name].add(function_qn)
+
+
+def generate_range_id(
+    project_name: str,
+    file_path: str,
+    start_line: int,
+    start_char: int,
+    end_line: int,
+    end_char: int,
+) -> str:
+    """Generate a deterministic hash for uniquely identifying a range of code.
+
+    The ID is derived from the tuple:
+      (project_name, file_path, start_line, start_char, end_line, end_char)
+
+    Returns:
+        Hex-encoded xxhash64 of the formatted tuple for valid inputs.
+        Empty string if `file_path` is empty or any of the range values are negative.
+    """
+    if not file_path:
+        return ""
+    if any(v < 0 for v in (start_line, start_char, end_line, end_char)):
+        return ""
+
+    raw = f"{project_name}|{file_path}|{start_line}:{start_char}-{end_line}:{end_char}"
+    return str(xxhash.xxh64_hexdigest(raw, seed=0))
