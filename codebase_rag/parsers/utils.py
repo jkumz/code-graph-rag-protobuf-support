@@ -231,10 +231,20 @@ def generate_range_id(
         Hex-encoded xxhash64 of the formatted tuple for valid inputs.
         Empty string if `file_path` is empty or any of the range values are negative.
     """
-    if not file_path:
-        return ""
-    if any(v < 0 for v in (start_line, start_char, end_line, end_char)):
+    fp = file_path.replace("\\", "/")
+    if fp.startswith("./"):
+        fp = fp[2:]
+    while fp.startswith("/"):
+        fp = fp[1:]
+    # Collapse redundant segments
+    import posixpath
+
+    fp = posixpath.normpath(fp)
+    if fp == ".":
+        fp = ""
+
+    if any(v < 0 for v in (start_line, start_char, end_line, end_char)) or len(fp) <= 1:
         return ""
 
-    raw = f"{project_name}|{file_path}|{start_line}:{start_char}-{end_line}:{end_char}"
+    raw = f"{project_name}|{fp}|{start_line}:{start_char}-{end_line}:{end_char}"
     return str(xxhash.xxh64_hexdigest(raw, seed=0))

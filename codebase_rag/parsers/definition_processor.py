@@ -91,7 +91,7 @@ class DefinitionProcessor:
         if isinstance(file_path, str):
             file_path = Path(file_path)
         relative_path = file_path.relative_to(self.repo_path)
-        relative_path_str = str(relative_path)
+        relative_path_str = relative_path.as_posix()
         logger.info(f"Parsing and Caching AST for {language}: {relative_path_str}")
 
         try:
@@ -188,23 +188,25 @@ class DefinitionProcessor:
                     root_node, module_qn, file_path, queries
                 )
             self._ingest_all_functions(
-                root_node, module_qn, language, queries, str(relative_path)
+                root_node, module_qn, language, queries, relative_path_str
             )
             self._ingest_classes_and_methods(
-                root_node, module_qn, language, queries, str(relative_path)
+                root_node, module_qn, language, queries, relative_path_str
             )
             self._ingest_object_literal_methods(
-                root_node, module_qn, language, queries, str(relative_path)
+                root_node, module_qn, language, queries, relative_path_str
             )
             self._ingest_commonjs_exports(
-                root_node, module_qn, language, queries, str(relative_path)
+                root_node, module_qn, language, queries, relative_path_str
             )
-            self._ingest_es6_exports(root_node, module_qn, language, queries)
+            self._ingest_es6_exports(
+                root_node, module_qn, language, queries, relative_path_str
+            )
             self._ingest_assignment_arrow_functions(
-                root_node, module_qn, language, queries, str(relative_path)
+                root_node, module_qn, language, queries, relative_path_str
             )
             self._ingest_prototype_inheritance(
-                root_node, module_qn, language, queries, str(relative_path)
+                root_node, module_qn, language, queries, relative_path_str
             )
 
             return root_node, language
@@ -698,9 +700,9 @@ class DefinitionProcessor:
             range_id = generate_range_id(
                 self.project_name,
                 str(file_path),
-                func_node.start_point[0] + 1,
+                func_node.start_point[0],
                 func_node.start_point[1],
-                func_node.end_point[0] + 1,
+                func_node.end_point[0],
                 func_node.end_point[1],
             )
             func_props: dict[str, Any] = {
@@ -1104,9 +1106,9 @@ class DefinitionProcessor:
                         range_id = generate_range_id(
                             self.project_name,
                             str(file_path),
-                            method_node.start_point[0] + 1,
+                            method_node.start_point[0],
                             method_node.start_point[1],
-                            method_node.end_point[0] + 1,
+                            method_node.end_point[0],
                             method_node.end_point[1],
                         )
 
@@ -1139,9 +1141,9 @@ class DefinitionProcessor:
             range_id = generate_range_id(
                 self.project_name,
                 str(file_path),
-                class_node.start_point[0] + 1,
+                class_node.start_point[0],
                 class_node.start_point[1],
-                class_node.end_point[0] + 1,
+                class_node.end_point[0],
                 class_node.end_point[1],
             )
 
@@ -1281,9 +1283,9 @@ class DefinitionProcessor:
                 range_id = generate_range_id(
                     self.project_name,
                     str(file_path),
-                    method_node.start_point[0] + 1,
+                    method_node.start_point[0],
                     method_node.start_point[1],
-                    method_node.end_point[0] + 1,
+                    method_node.end_point[0],
                     method_node.end_point[1],
                 )
 
@@ -1797,9 +1799,9 @@ class DefinitionProcessor:
                     range_id = generate_range_id(
                         self.project_name,
                         str(file_path),
-                        func_node.start_point[0] + 1,
+                        func_node.start_point[0],
                         func_node.start_point[1],
-                        func_node.end_point[0] + 1,
+                        func_node.end_point[0],
                         func_node.end_point[1],
                     )
 
@@ -2092,9 +2094,9 @@ class DefinitionProcessor:
                             range_id = generate_range_id(
                                 self.project_name,
                                 str(path),
-                                method_func_node.start_point[0] + 1,
+                                method_func_node.start_point[0],
                                 method_func_node.start_point[1],
-                                method_func_node.end_point[0] + 1,
+                                method_func_node.end_point[0],
                                 method_func_node.end_point[1],
                             )
 
@@ -2192,9 +2194,9 @@ class DefinitionProcessor:
                             range_id = generate_range_id(
                                 self.project_name,
                                 str(path),
-                                export_function.start_point[0] + 1,
+                                export_function.start_point[0],
                                 export_function.start_point[1],
-                                export_function.end_point[0] + 1,
+                                export_function.end_point[0],
                                 export_function.end_point[1],
                             )
                             ingest_exported_function(
@@ -2230,9 +2232,9 @@ class DefinitionProcessor:
                             range_id = generate_range_id(
                                 self.project_name,
                                 str(path),
-                                export_function.start_point[0] + 1,
+                                export_function.start_point[0],
                                 export_function.start_point[1],
-                                export_function.end_point[0] + 1,
+                                export_function.end_point[0],
                                 export_function.end_point[1],
                             )
                             ingest_exported_function(
@@ -2299,9 +2301,9 @@ class DefinitionProcessor:
                             range_id = generate_range_id(
                                 self.project_name,
                                 str(path),
-                                export_function.start_point[0] + 1,
+                                export_function.start_point[0],
                                 export_function.start_point[1],
-                                export_function.end_point[0] + 1,
+                                export_function.end_point[0],
                                 export_function.end_point[1],
                             )
                             function_name = export_name.text.decode("utf8")
@@ -2331,9 +2333,9 @@ class DefinitionProcessor:
                                         range_id = generate_range_id(
                                             self.project_name,
                                             str(path),
-                                            export_function.start_point[0] + 1,
+                                            export_function.start_point[0],
                                             export_function.start_point[1],
-                                            export_function.end_point[0] + 1,
+                                            export_function.end_point[0],
                                             export_function.end_point[1],
                                         )
                                         ingest_exported_function(
@@ -2434,9 +2436,9 @@ class DefinitionProcessor:
                             range_id = generate_range_id(
                                 self.project_name,
                                 str(path),
-                                arrow_function.start_point[0] + 1,
+                                arrow_function.start_point[0],
                                 arrow_function.start_point[1],
-                                arrow_function.end_point[0] + 1,
+                                arrow_function.end_point[0],
                                 arrow_function.end_point[1],
                             )
 
@@ -2487,9 +2489,9 @@ class DefinitionProcessor:
                                 range_id = generate_range_id(
                                     self.project_name,
                                     str(path),
-                                    arrow_function.start_point[0] + 1,
+                                    arrow_function.start_point[0],
                                     arrow_function.start_point[1],
-                                    arrow_function.end_point[0] + 1,
+                                    arrow_function.end_point[0],
                                     arrow_function.end_point[1],
                                 )
 
@@ -2540,9 +2542,9 @@ class DefinitionProcessor:
                                 range_id = generate_range_id(
                                     self.project_name,
                                     str(path),
-                                    function_expr.start_point[0] + 1,
+                                    function_expr.start_point[0],
                                     function_expr.start_point[1],
-                                    function_expr.end_point[0] + 1,
+                                    function_expr.end_point[0],
                                     function_expr.end_point[1],
                                 )
 

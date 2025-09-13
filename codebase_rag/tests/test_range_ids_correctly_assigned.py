@@ -223,9 +223,9 @@ def test_python_function_class_and_method_range_ids(
     expected_func_id = generate_range_id(
         project_name,
         rel_path,
-        func_node.start_point[0] + 1,
+        func_node.start_point[0],
         func_node.start_point[1],
-        func_node.end_point[0] + 1,
+        func_node.end_point[0],
         func_node.end_point[1],
     )
     assert f_props["range_id"] == expected_func_id
@@ -238,9 +238,9 @@ def test_python_function_class_and_method_range_ids(
     expected_class_id = generate_range_id(
         project_name,
         rel_path,
-        class_node.start_point[0] + 1,
+        class_node.start_point[0],
         class_node.start_point[1],
-        class_node.end_point[0] + 1,
+        class_node.end_point[0],
         class_node.end_point[1],
     )
     assert c_props["range_id"] == expected_class_id
@@ -253,9 +253,9 @@ def test_python_function_class_and_method_range_ids(
     expected_method_id = generate_range_id(
         project_name,
         rel_path,
-        method_node.start_point[0] + 1,
+        method_node.start_point[0],
         method_node.start_point[1],
-        method_node.end_point[0] + 1,
+        method_node.end_point[0],
         method_node.end_point[1],
     )
     assert m_props["range_id"] == expected_method_id
@@ -314,6 +314,6 @@ def test_es6_export_function_range_id(
     foo_props = _find_node(ingestor, "Function", "foo")
     assert foo_props is not None
     expected_id = generate_range_id(
-        project_name, rel_path, 5, 2, 8, 5
+        project_name, rel_path, 4, 2, 7, 5
     )  # start/end lines are +1 from points
     assert foo_props["range_id"] == expected_id
