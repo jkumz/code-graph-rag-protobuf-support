@@ -26,6 +26,7 @@ class MemgraphIngestor:
             "Method": "qualified_name",
             "File": "path",
             "ExternalPackage": "name",
+            "Path": "qualified_name",
         }
 
     def __enter__(self) -> "MemgraphIngestor":
