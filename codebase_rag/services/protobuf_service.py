@@ -37,7 +37,7 @@ class ProtobufFileIngestor:
 
     def __init__(self, output_path: str, split_index: bool = False):
         self.output_dir = Path(output_path)
-        self._nodes: dict[str, pb.Node] = {}
+        self._nodes: dict[str, dict[str, pb.Node]] = {}
         self._relationships: dict[tuple[str, int, str], pb.Relationship] = {}
         self.split_index = split_index
         logger.info(f"ProtobufFileIngestor initialized to write to: {self.output_dir}")
@@ -49,48 +49,14 @@ class ProtobufFileIngestor:
         else:
             return str(properties.get("qualified_name", ""))
 
-    """
-    (1)
-
-    ok so the issue is that we blindly deduplicate on values that can
-    occur on more than one type of node. In this case, perhaps its best for
-    us to deduplicate based on each type of node.
-
-    this would involve having a map of <nodeLabel : List of IDs>.
-    this way we block all collisions.
-
-    This will require changing how we interact with self._nodes and the structure
-    of self._nodes.
-
-    (2)
-
-    We also need to update _get_node_id to get the correct node IDs. I remember
-    we recently changed the PK for some nodes. So we need to change _get_node_id
-    accordingly. That's a more minor change though, it just requires checking our protobuf schema.
-
-    --------------------------------------------------------
-
-    Ok, let's look at (2) first as it's the easy one.
-
-    Name as PK: Project, ExternalPackage
-
-    QualifiedName as PK: Package, Folder, File, Module, ModuleImplementation,
-    ModuleInterface, Class, Function, Method, Path
-
-    So we can say if it's not Project or ExternalPackage it's going to be QN as PK.
-
-    DONE
-
-    --------------------------------------------------------
-
-    Now back to (1).
-    """
-
     def ensure_node_batch(self, label: str, properties: dict[str, Any]) -> None:
         """Creates a protobuf Node message and adds it to the in-memory buffer."""
         node_id = self._get_node_id(label, properties)
-        if not node_id or node_id in self._nodes:
-            return
+        if self._nodes.get(label):
+            if not node_id or node_id in self._nodes[label]:
+                return
+        else:
+            self._nodes[label] = {}
 
         payload_message_class = getattr(pb, label, None)
         if not payload_message_class:
@@ -126,7 +92,7 @@ class ProtobufFileIngestor:
         # Set the 'oneof' payload field using the correct name
         getattr(node, payload_field_name).CopyFrom(payload_message)
 
-        self._nodes[node_id] = node
+        self._nodes[label][node_id] = node
 
     def ensure_relationship_batch(
         self,
@@ -175,7 +141,8 @@ class ProtobufFileIngestor:
         """Assembles index into a single Protobuf file"""
 
         index = pb.GraphCodeIndex()
-        index.nodes.extend(self._nodes.values())
+        for _, nodes in self._nodes.items():
+            index.nodes.extend(nodes.values())
         index.relationships.extend(self._relationships.values())
 
         serialised_file = index.SerializeToString()
@@ -184,8 +151,12 @@ class ProtobufFileIngestor:
         with open(out_path, "wb") as f:
             f.write(serialised_file)
 
+        count_nodes = 0
+        for _, nodes in self._nodes.items():
+            count_nodes += len(nodes)
+
         logger.success(
-            f"Successfully flushed {len(self._nodes)} unique nodes and {len(self._relationships)} unique relationships to {self.output_dir}"
+            f"Successfully flushed {count_nodes} unique nodes and {len(self._relationships)} unique relationships to {self.output_dir}"
         )
 
     def _flush_split(self) -> None:
@@ -194,7 +165,8 @@ class ProtobufFileIngestor:
 
         nodes_index = pb.GraphCodeIndex()
         rels_index = pb.GraphCodeIndex()
-        nodes_index.nodes.extend(self._nodes.values())
+        for _, nodes in self._nodes.items():
+            nodes_index.nodes.extend(nodes.values())
         rels_index.relationships.extend(self._relationships.values())
 
         serialised_nodes = nodes_index.SerializeToString()
@@ -210,8 +182,12 @@ class ProtobufFileIngestor:
         with open(rels_path, "wb") as f:
             f.write(serialised_rels)
 
+        count_nodes = 0
+        for _, nodes in self._nodes.items():
+            count_nodes += len(nodes)
+
         logger.success(
-            f"Successfully flushed {len(self._nodes)} unique nodes and {len(self._relationships)} unique relationships to {self.output_dir}"
+            f"Successfully flushed {count_nodes} unique nodes and {len(self._relationships)} unique relationships to {self.output_dir}"
         )
 
     def flush_all(self) -> None:
