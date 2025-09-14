@@ -314,7 +314,7 @@ def test_structure_processor_connects_packages_and_parents_to_path_nodes(
     # AT_PATH from Folder parent to nested package Path
     assert _has_relationship(
         ingestor,
-        ("Folder", "path", "folderonly"),
+        ("Folder", "qualified_name", f"{project_name}.folderonly"),
         "AT_PATH",
         ("Path", "qualified_name", f"{project_name}.folderonly/subpkg2"),
     )
@@ -362,15 +362,15 @@ def test_structure_processor_process_generic_file_links_to_path(tmp_path: Path) 
     # Folder CONTAINS_FILE File
     assert _has_relationship(
         ingestor,
-        ("Folder", "path", "docs"),
+        ("Folder", "qualified_name", f"{project_name}.docs"),
         "CONTAINS_FILE",
-        ("File", "path", relative_fp),
+        ("File", "qualified_name", f"{project_name}.docs.readme"),
     )
 
     # File AT_PATH Path (Path node may be created elsewhere; here we only assert the link)
     assert _has_relationship(
         ingestor,
-        ("File", "path", relative_fp),
+        ("File", "qualified_name", f"{project_name}.docs.readme"),
         "AT_PATH",
         ("Path", "qualified_name", f"{project_name}.{relative_fp}"),
     )

@@ -327,36 +327,36 @@ def test_contains_folder_relationships(
         # Root project contains top-level folders
         (
             ("Project", "name", project_name),
-            ("Folder", "path", "frontend"),
+            ("Folder", "qualified_name", f"{project_name}.frontend"),
         ),
         (
             ("Project", "name", project_name),
-            ("Folder", "path", "docs"),
+            ("Folder", "qualified_name", f"{project_name}.docs"),
         ),
         (
             ("Project", "name", project_name),
-            ("Folder", "path", "config"),
+            ("Folder", "qualified_name", f"{project_name}.config"),
         ),
         (
             ("Project", "name", project_name),
-            ("Folder", "path", "assets"),
+            ("Folder", "qualified_name", f"{project_name}.assets"),
         ),
         # Nested folder relationships
         (
-            ("Folder", "path", "frontend"),
-            ("Folder", "path", "frontend/src"),
+            ("Folder", "qualified_name", f"{project_name}.frontend"),
+            ("Folder", "qualified_name", f"{project_name}.frontend.src"),
         ),
         (
-            ("Folder", "path", "frontend/src"),
-            ("Folder", "path", "frontend/src/components"),
+            ("Folder", "qualified_name", f"{project_name}.frontend.src"),
+            ("Folder", "qualified_name", f"{project_name}.frontend.src.components"),
         ),
         (
-            ("Folder", "path", "docs"),
-            ("Folder", "path", "docs/guides"),
+            ("Folder", "qualified_name", f"{project_name}.docs"),
+            ("Folder", "qualified_name", f"{project_name}.docs.guides"),
         ),
         (
-            ("Folder", "path", "assets"),
-            ("Folder", "path", "assets/images"),
+            ("Folder", "qualified_name", f"{project_name}.assets"),
+            ("Folder", "qualified_name", f"{project_name}.assets.images"),
         ),
     ]
 
@@ -399,126 +399,130 @@ def test_contains_file_relationships(
         # Root project contains root-level files
         (
             ("Project", "name", project_name),
-            ("File", "path", "README.md"),
+            ("File", "qualified_name", f"{project_name}.README"),
         ),
         (
             ("Project", "name", project_name),
-            ("File", "path", ".gitignore"),
+            ("File", "qualified_name", f"{project_name}..gitignore"),
         ),
         (
             ("Project", "name", project_name),
-            ("File", "path", "LICENSE"),
+            ("File", "qualified_name", f"{project_name}.LICENSE"),
         ),
         # Packages contain module files
         (
             ("Package", "qualified_name", f"{project_name}.mypackage"),
-            ("File", "path", "mypackage/__init__.py"),
+            ("File", "qualified_name", f"{project_name}.mypackage.__init__"),
         ),
         (
             ("Package", "qualified_name", f"{project_name}.mypackage"),
-            ("File", "path", "mypackage/core.py"),
+            ("File", "qualified_name", f"{project_name}.mypackage.core"),
         ),
         (
             ("Package", "qualified_name", f"{project_name}.mypackage.utils"),
-            ("File", "path", "mypackage/utils/__init__.py"),
+            ("File", "qualified_name", f"{project_name}.mypackage.utils.__init__"),
         ),
         (
             ("Package", "qualified_name", f"{project_name}.mypackage.utils"),
-            ("File", "path", "mypackage/utils/helpers.py"),
+            ("File", "qualified_name", f"{project_name}.mypackage.utils.helpers"),
         ),
         (
             ("Package", "qualified_name", f"{project_name}.mypackage.utils"),
-            ("File", "path", "mypackage/utils/constants.py"),
+            ("File", "qualified_name", f"{project_name}.mypackage.utils.constants"),
         ),
         (
             ("Package", "qualified_name", f"{project_name}.mypackage.utils.deep"),
-            ("File", "path", "mypackage/utils/deep/__init__.py"),
+            ("File", "qualified_name", f"{project_name}.mypackage.utils.deep.__init__"),
         ),
         (
             ("Package", "qualified_name", f"{project_name}.mypackage.utils.deep"),
-            ("File", "path", "mypackage/utils/deep/nested.py"),
+            ("File", "qualified_name", f"{project_name}.mypackage.utils.deep.nested"),
         ),
         # Folders contain various files
         (
-            ("Folder", "path", "frontend"),
-            ("File", "path", "frontend/package.json"),
+            ("Folder", "qualified_name", f"{project_name}.frontend"),
+            ("File", "qualified_name", f"{project_name}.frontend.package"),
         ),
         (
-            ("Folder", "path", "frontend"),
-            ("File", "path", "frontend/index.js"),
+            ("Folder", "qualified_name", f"{project_name}.frontend"),
+            ("File", "qualified_name", f"{project_name}.frontend.index"),
         ),
         (
-            ("Folder", "path", "frontend/src"),
-            ("File", "path", "frontend/src/app.js"),
+            ("Folder", "qualified_name", f"{project_name}.frontend.src"),
+            ("File", "qualified_name", f"{project_name}.frontend.src.app"),
         ),
         (
-            ("Folder", "path", "frontend/src"),
-            ("File", "path", "frontend/src/utils.js"),
+            ("Folder", "qualified_name", f"{project_name}.frontend.src"),
+            ("File", "qualified_name", f"{project_name}.frontend.src.utils"),
         ),
         (
-            ("Folder", "path", "frontend/src/components"),
-            ("File", "path", "frontend/src/components/Button.jsx"),
+            ("Folder", "qualified_name", f"{project_name}.frontend.src.components"),
+            (
+                "File",
+                "qualified_name",
+                f"{project_name}.frontend.src.components.Button",
+            ),
         ),
         (
-            ("Folder", "path", "frontend/src/components"),
-            ("File", "path", "frontend/src/components/Modal.tsx"),
+            ("Folder", "qualified_name", f"{project_name}.frontend.src.components"),
+            ("File", "qualified_name", f"{project_name}.frontend.src.components.Modal"),
         ),
         (
-            ("Folder", "path", "docs"),
-            ("File", "path", "docs/api.md"),
+            ("Folder", "qualified_name", f"{project_name}.docs"),
+            ("File", "qualified_name", f"{project_name}.docs.api"),
         ),
         (
-            ("Folder", "path", "docs"),
-            ("File", "path", "docs/tutorial.rst"),
+            ("Folder", "qualified_name", f"{project_name}.docs"),
+            ("File", "qualified_name", f"{project_name}.docs.tutorial"),
         ),
         (
-            ("Folder", "path", "docs/guides"),
-            ("File", "path", "docs/guides/setup.md"),
+            ("Folder", "qualified_name", f"{project_name}.docs.guides"),
+            ("File", "qualified_name", f"{project_name}.docs.guides.setup"),
         ),
         (
-            ("Folder", "path", "docs/guides"),
-            ("File", "path", "docs/guides/advanced.md"),
+            ("Folder", "qualified_name", f"{project_name}.docs.guides"),
+            ("File", "qualified_name", f"{project_name}.docs.guides.advanced"),
         ),
         (
-            ("Folder", "path", "config"),
-            ("File", "path", "config/settings.yaml"),
+            ("Folder", "qualified_name", f"{project_name}.config"),
+            ("File", "qualified_name", f"{project_name}.config.settings"),
         ),
         (
-            ("Folder", "path", "config"),
-            ("File", "path", "config/database.ini"),
+            ("Folder", "qualified_name", f"{project_name}.config"),
+            ("File", "qualified_name", f"{project_name}.config.database"),
         ),
         (
-            ("Folder", "path", "assets"),
-            ("File", "path", "assets/logo.png"),
+            ("Folder", "qualified_name", f"{project_name}.assets"),
+            ("File", "qualified_name", f"{project_name}.assets.logo"),
         ),
         (
-            ("Folder", "path", "assets"),
-            ("File", "path", "assets/style.css"),
+            ("Folder", "qualified_name", f"{project_name}.assets"),
+            ("File", "qualified_name", f"{project_name}.assets.style"),
         ),
         (
-            ("Folder", "path", "assets/images"),
-            ("File", "path", "assets/images/hero.jpg"),
+            ("Folder", "qualified_name", f"{project_name}.assets.images"),
+            ("File", "qualified_name", f"{project_name}.assets.images.hero"),
         ),
         (
-            ("Folder", "path", "assets/images"),
-            ("File", "path", "assets/images/icon.svg"),
+            ("Folder", "qualified_name", f"{project_name}.assets.images"),
+            ("File", "qualified_name", f"{project_name}.assets.images.icon"),
         ),
         # Test package files
         (
             ("Package", "qualified_name", f"{project_name}.tests"),
-            ("File", "path", "tests/__init__.py"),
+            ("File", "qualified_name", f"{project_name}.tests.__init__"),
         ),
         (
             ("Package", "qualified_name", f"{project_name}.tests"),
-            ("File", "path", "tests/test_core.py"),
+            ("File", "qualified_name", f"{project_name}.tests.test_core"),
         ),
         (
             ("Package", "qualified_name", f"{project_name}.tests.unit"),
-            ("File", "path", "tests/unit/__init__.py"),
+            ("File", "qualified_name", f"{project_name}.tests.unit.__init__"),
         ),
         (
             ("Package", "qualified_name", f"{project_name}.tests.unit"),
-            ("File", "path", "tests/unit/test_utils.py"),
+            ("File", "qualified_name", f"{project_name}.tests.unit.test_utils"),
         ),
     ]
 
@@ -1008,14 +1012,13 @@ def test_edge_cases_empty_folders_and_special_files(
         (
             call[0][0] == ("Project", "name", project_name)
             and call[0][1] == "CONTAINS_FOLDER"
-            and call[0][2] == ("Folder", "path", "empty")
+            and call[0][2] == ("Folder", "qualified_name", f"{project_name}.empty")
         )
         for call in all_calls
     )
     assert empty_folder_found, "Empty folder should be tracked"
 
     # Check hidden files are handled
-    # Note: If project root has package indicators, it becomes a Package not Project
     hidden_file_found = any(
         (
             (
@@ -1023,7 +1026,7 @@ def test_edge_cases_empty_folders_and_special_files(
                 or call[0][0] == ("Package", "qualified_name", project_name)
             )
             and call[0][1] == "CONTAINS_FILE"
-            and call[0][2] == ("File", "path", ".env")
+            and call[0][2] == ("File", "qualified_name", f"{project_name}..env")
         )
         for call in all_calls
     )
@@ -1032,9 +1035,11 @@ def test_edge_cases_empty_folders_and_special_files(
     # Check nested hidden structure
     hidden_workflow_found = any(
         (
-            call[0][0] == ("Folder", "path", ".github/workflows")
+            call[0][0]
+            == ("Folder", "qualified_name", f"{project_name}..github.workflows")
             and call[0][1] == "CONTAINS_FILE"
-            and call[0][2] == ("File", "path", ".github/workflows/ci.yml")
+            and call[0][2]
+            == ("File", "qualified_name", f"{project_name}..github.workflows.ci")
         )
         for call in all_calls
     )
@@ -1043,6 +1048,7 @@ def test_edge_cases_empty_folders_and_special_files(
     # Check special files
     special_files = ["Dockerfile", "Makefile", "script.sh", "LICENSE", "VERSION"]
     for special_file in special_files:
+        base = Path(special_file).with_suffix("").name
         special_file_found = any(
             (
                 (
@@ -1050,7 +1056,12 @@ def test_edge_cases_empty_folders_and_special_files(
                     or call[0][0] == ("Package", "qualified_name", project_name)
                 )
                 and call[0][1] == "CONTAINS_FILE"
-                and call[0][2] == ("File", "path", special_file)
+                and call[0][2]
+                == (
+                    "File",
+                    "qualified_name",
+                    f"{project_name}.{base if base != 'script' else 'script'}",
+                )
             )
             for call in all_calls
         )

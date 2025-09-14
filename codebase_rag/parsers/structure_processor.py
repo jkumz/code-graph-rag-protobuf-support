@@ -91,7 +91,11 @@ class StructureProcessor:
                     else (
                         ("Package", "qualified_name", parent_container_qn)
                         if parent_container_qn
-                        else ("Folder", "path", str(parent_rel_path))
+                        else (
+                            "Folder",
+                            "qualified_name",
+                            ".".join([self.project_name] + list(parent_rel_path.parts)),
+                        )
                     )
                 )
 
@@ -111,6 +115,9 @@ class StructureProcessor:
 
                 # If parent is a Folder, also link Folder -> AT_PATH -> child package's Path
                 if parent_label == "Folder":
+                    logger.info(
+                        f"  Linking Folder {parent_val} -> AT_PATH -> {path_qn}"
+                    )
                     self.ingestor.ensure_relationship_batch(
                         (parent_label, parent_key, parent_val),
                         "AT_PATH",
@@ -137,7 +144,11 @@ class StructureProcessor:
                     else (
                         ("Package", "qualified_name", parent_container_qn)
                         if parent_container_qn
-                        else ("Folder", "path", str(parent_rel_path))
+                        else (
+                            "Folder",
+                            "qualified_name",
+                            ".".join([self.project_name] + list(parent_rel_path.parts)),
+                        )
                     )
                 )
 
@@ -145,11 +156,12 @@ class StructureProcessor:
                 self.ingestor.ensure_relationship_batch(
                     (parent_label, parent_key, parent_val),
                     "CONTAINS_FOLDER",
-                    ("Folder", "path", str(relative_root)),
+                    ("Folder", "qualified_name", folder_qn),
                 )
 
                 # this folder -> AT_PATH -> its Path
                 path_qn = f"{self.project_name}.{str(relative_root)}"
+                logger.info(f"  Creating Path node for {path_qn}")
                 self.ingestor.ensure_node_batch(
                     "Path",
                     {
@@ -157,8 +169,9 @@ class StructureProcessor:
                         "path": str(relative_root),
                     },
                 )
+                logger.info(f"  Linking Folder {folder_qn} -> AT_PATH -> {path_qn}")
                 self.ingestor.ensure_relationship_batch(
-                    ("Folder", "path", str(relative_root)),
+                    ("Folder", "qualified_name", folder_qn),
                     "AT_PATH",
                     ("Path", "qualified_name", path_qn),
                 )
@@ -177,7 +190,11 @@ class StructureProcessor:
             ("Package", "qualified_name", parent_container_qn)
             if parent_container_qn
             else (
-                ("Folder", "path", str(relative_root))
+                (
+                    "Folder",
+                    "qualified_name",
+                    ".".join([self.project_name] + list(relative_root.parts)),
+                )
                 if relative_root != Path(".")
                 else ("Project", "name", self.project_name)
             )
@@ -198,13 +215,23 @@ class StructureProcessor:
         self.ingestor.ensure_relationship_batch(
             (parent_label, parent_key, parent_val),
             "CONTAINS_FILE",
-            ("File", "path", str(relative_file)),
+            ("File", "qualified_name", file_qn),
         )
 
         # (File)-[:AT_PATH]->(Path)
         file_path_qn = f"{self.project_name}.{str(relative_file)}"
+        logger.info(f"  Creating Path node for {file_path_qn}")
+        self.ingestor.ensure_node_batch(
+            "Path",
+            {
+                "qualified_name": file_path_qn,
+                "path": str(relative_file),
+            },
+        )
+
+        logger.info(f"  Linking File {file_qn} -> AT_PATH -> {file_path_qn}")
         self.ingestor.ensure_relationship_batch(
-            ("File", "path", str(relative_file)),
+            ("File", "qualified_name", file_qn),
             "AT_PATH",
             ("Path", "qualified_name", file_path_qn),
         )
