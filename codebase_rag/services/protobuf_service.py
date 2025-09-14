@@ -44,12 +44,47 @@ class ProtobufFileIngestor:
 
     def _get_node_id(self, label: str, properties: dict) -> str:
         """Determines the primary/node key for a node."""
-        if label in ["Folder", "File"]:
-            return str(properties.get("path", ""))
-        elif label in ["ExternalPackage", "Project"]:
+        if label in ["ExternalPackage", "Project"]:
             return str(properties.get("name", ""))
         else:
             return str(properties.get("qualified_name", ""))
+
+    """
+    (1)
+
+    ok so the issue is that we blindly deduplicate on values that can
+    occur on more than one type of node. In this case, perhaps its best for
+    us to deduplicate based on each type of node.
+
+    this would involve having a map of <nodeLabel : List of IDs>.
+    this way we block all collisions.
+
+    This will require changing how we interact with self._nodes and the structure
+    of self._nodes.
+
+    (2)
+
+    We also need to update _get_node_id to get the correct node IDs. I remember
+    we recently changed the PK for some nodes. So we need to change _get_node_id
+    accordingly. That's a more minor change though, it just requires checking our protobuf schema.
+
+    --------------------------------------------------------
+
+    Ok, let's look at (2) first as it's the easy one.
+
+    Name as PK: Project, ExternalPackage
+
+    QualifiedName as PK: Package, Folder, File, Module, ModuleImplementation,
+    ModuleInterface, Class, Function, Method, Path
+
+    So we can say if it's not Project or ExternalPackage it's going to be QN as PK.
+
+    DONE
+
+    --------------------------------------------------------
+
+    Now back to (1).
+    """
 
     def ensure_node_batch(self, label: str, properties: dict[str, Any]) -> None:
         """Creates a protobuf Node message and adds it to the in-memory buffer."""
